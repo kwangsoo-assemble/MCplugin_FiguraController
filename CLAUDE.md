@@ -7,6 +7,9 @@ CH 「플레이어 피구라 컨트롤러」(`includes/system/player_figura_cont
 - **GitHub `kwangsoo-assemble/MCplugin_FiguraController` 의 작업본**이다(2026-10-10 — 🙋 «여기에 올려서 관리되게») — 한글 주석 · 이 CLAUDE.md 까지 그대로 올라간다 · MIT
   · 매듭마다 로컬 커밋 → `python ../../../mc_content_production/projects/mc_repositories/tools/repos.py publish figuracontroller` (세션이 자동 · `--force` 금지)
   · README.md 는 영어판 · **원본은 하네스 한글판** `projects/mc_repositories/readme_ko/MCplugin_FiguraController.md` → 옮긴 뒤 `repos.py mark-readme figuracontroller`
+  · ★ **버전 · 릴리스** (🙋 2026-10-10): jar 에 들어가는 코드가 바뀌면 `pom.xml` `<version>` 을 올린다 — `0.MINOR.PATCH`(기능 MINOR · 고침 PATCH ·
+    규약 `figuracontroller:v1` 이 바뀌면 MINOR 이고 코어도 같이) → 빌드 · 배포 · 🎬 → `repos.py release figuracontroller`(태그 + Release 에 jar) ·
+    문서만 바뀌면 안 올린다 · 안 올리면 `VERSION_STALE` · 올리고 안 내면 `UNRELEASED`
 - **사용법 정본**: `API.md` (Java · CH · Lua · `/fc` · 공개 범위 · 저장 · 진단) — API · 명령 · 저장 형식을 바꾸면 **같은 커밋에서** 고친다 (팀원에게 이 파일을 넘긴다)
 
 ## 빌드 · 시험
