@@ -1,6 +1,7 @@
-package kr.asmbl.figuracontroller.core;
+package kr.asmbl.figuracontroller.completion;
 
 import com.google.gson.JsonElement;
+import kr.asmbl.figuracontroller.core.ValueParse;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -30,6 +31,8 @@ import java.util.regex.Pattern;
  * 이름 칸 = 정확한 이름 · {@code *}(아무 글자) · {@code |}(여럿). 후보 하나 = 글자 그대로 · {@code $목록} · {@code $online} ·
  * {@code $used}(상태만) · {@code 시작..끝}(정수) · {@code $$글}({@code $} 로 시작하는 글자).
  * <p>
+ * ⓘ `core` 가 아니라 따로 둔 까닭 — `core` 는 **Gson 만 쓰는 Bukkit 없는 층**이라는 계약이 있다(하네스 `projects/figura_controller/tests/verify_core_serverdata.py` 가
+ * 그 층만 javac 로 묶어 클라 모델과 이어 돌린다). 이 클래스는 SnakeYAML 을 쓴다.
  * ★ YAML 은 **글자로만** 읽는다(암묵 해석기를 껐다) — 후보는 «적은 그대로» 명령에 들어가야 하고,
  * YAML 1.1 은 {@code on} · {@code no} · {@code 1:30} · {@code 2026-10-10} 을 불 · 수 · 날짜로 바꿔 버린다(하네스 기억 «YAML boolean 키 함정»).
  */

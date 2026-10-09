@@ -1,8 +1,9 @@
-package kr.asmbl.figuracontroller.core;
+package kr.asmbl.figuracontroller.completion;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import kr.asmbl.figuracontroller.core.ValueParse;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

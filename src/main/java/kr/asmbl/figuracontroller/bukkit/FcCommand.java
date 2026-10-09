@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import kr.asmbl.figuracontroller.api.Audience;
 import kr.asmbl.figuracontroller.api.ChangeCause;
 import kr.asmbl.figuracontroller.api.StateOptions;
-import kr.asmbl.figuracontroller.core.CompletionRules;
+import kr.asmbl.figuracontroller.completion.CompletionRules;
 import kr.asmbl.figuracontroller.core.Dispatcher;
 import kr.asmbl.figuracontroller.core.Entry;
 import kr.asmbl.figuracontroller.core.PresetCodec;

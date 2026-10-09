@@ -1,6 +1,6 @@
 package kr.asmbl.figuracontroller.bukkit;
 
-import kr.asmbl.figuracontroller.core.CompletionRules;
+import kr.asmbl.figuracontroller.completion.CompletionRules;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
