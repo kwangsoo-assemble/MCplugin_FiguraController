@@ -110,5 +110,8 @@ public interface FiguraControllerAPI {
 
         /** 전원에게 */
         void sendSignal(String name, JsonElement data);
+
+        /** {@link Audience#players} 면 그 사람들에게만 · 그 밖({@code SELF} · {@code TRACKERS} · {@code ALL})은 전원 — 전역에는 대상이 없다 */
+        void sendSignal(String name, JsonElement data, Audience audience);
     }
 }

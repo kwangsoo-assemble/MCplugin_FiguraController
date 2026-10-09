@@ -212,5 +212,10 @@ final class ApiImpl implements FiguraControllerAPI {
         public void sendSignal(String name, JsonElement data) {
             signalInternal(null, name, data, Audience.ALL);
         }
+
+        @Override
+        public void sendSignal(String name, JsonElement data, Audience audience) {
+            signalInternal(null, name, data, audience == null ? Audience.ALL : audience);
+        }
     }
 }
