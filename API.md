@@ -1,6 +1,6 @@
 # FiguraController — API
 
-서버가 주인인 **Figura 상태 · 신호** 플러그인 (Purpur/Paper 1.21.8 · 내부용).
+서버가 주인인 **Figura 상태 · 신호** 플러그인 (Purpur/Paper 1.21.8 · MIT · GitHub `kwangsoo-assemble/MCplugin_FiguraController`).
 CH 「플레이어 피구라 컨트롤러」를 갈음한다 (2026-10-10 배포 · 설계 정본: 하네스 `projects/figura_controller/design/컨트롤러_플러그인/plan.md`).
 
 ```
