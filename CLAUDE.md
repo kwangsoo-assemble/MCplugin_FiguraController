@@ -5,6 +5,7 @@ CH 「플레이어 피구라 컨트롤러」(`includes/system/player_figura_cont
 
 - **설계 정본**: 하네스 `projects/figura_controller/design/컨트롤러_플러그인/plan.md` (✅ 2026-10-10) · 진행 기록은 같은 폴더의 `progress.md`
 - **내부판만** 있다(🙋 «내부용») — 공개판 없음 · 로컬 git · 원격 없음
+- **사용법 정본**: `API.md` (Java · CH · Lua · `/fc` · 공개 범위 · 저장 · 진단) — API · 명령 · 저장 형식을 바꾸면 **같은 커밋에서** 고친다 (팀원에게 이 파일을 넘긴다)
 
 ## 빌드 · 시험
 
