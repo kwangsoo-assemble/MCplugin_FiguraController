@@ -1,0 +1,3 @@
+# 줄끝은 LF 로 고정 — 이 기계의 git 은 core.autocrlf=true 다. 코덱 원본 · 시험 벡터는 하네스 verify_codec 이 코어 사본과 대조한다
+* text=auto eol=lf
+*.jar binary
