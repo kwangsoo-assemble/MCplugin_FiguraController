@@ -1,0 +1,807 @@
+{
+ "_": "생성물이다 — 손으로 고치지 마라. 하네스 projects/figura_controller/tests/fc_codec_ref.py 가 만든다 (python fc_codec_ref.py --write <이 파일>)",
+ "channel": "figuracontroller:v1",
+ "channelId": 352628793,
+ "version": 1,
+ "maxBody": 30000,
+ "maxValue": 29900,
+ "maxDepth": 32,
+ "values": [
+  {
+   "name": "null",
+   "json": "null",
+   "hex": "00"
+  },
+  {
+   "name": "false",
+   "json": "false",
+   "hex": "01"
+  },
+  {
+   "name": "true",
+   "json": "true",
+   "hex": "02"
+  },
+  {
+   "name": "int 0",
+   "json": "0",
+   "hex": "0300"
+  },
+  {
+   "name": "int 1",
+   "json": "1",
+   "hex": "0302"
+  },
+  {
+   "name": "int -1",
+   "json": "-1",
+   "hex": "0301"
+  },
+  {
+   "name": "int 63",
+   "json": "63",
+   "hex": "037e"
+  },
+  {
+   "name": "int -64",
+   "json": "-64",
+   "hex": "037f"
+  },
+  {
+   "name": "int 64",
+   "json": "64",
+   "hex": "038001"
+  },
+  {
+   "name": "int 300",
+   "json": "300",
+   "hex": "03d804"
+  },
+  {
+   "name": "int max",
+   "json": "9223372036854775807",
+   "hex": "03feffffffffffffffff01"
+  },
+  {
+   "name": "int min",
+   "json": "-9223372036854775808",
+   "hex": "03ffffffffffffffffff01"
+  },
+  {
+   "name": "int -0",
+   "json": "-0",
+   "hex": "0300"
+  },
+  {
+   "name": "big int → double",
+   "json": "123456789012345678901234",
+   "hex": "0444ba249b1f10a06d"
+  },
+  {
+   "name": "double 1.0",
+   "json": "1.0",
+   "hex": "043ff0000000000000"
+  },
+  {
+   "name": "double 1.5",
+   "json": "1.5",
+   "hex": "043ff8000000000000"
+  },
+  {
+   "name": "double -0.25",
+   "json": "-0.25",
+   "hex": "04bfd0000000000000"
+  },
+  {
+   "name": "double 1e3",
+   "json": "1e3",
+   "hex": "04408f400000000000"
+  },
+  {
+   "name": "double 0.1",
+   "json": "0.1",
+   "hex": "043fb999999999999a"
+  },
+  {
+   "name": "string empty",
+   "json": "\"\"",
+   "hex": "0500"
+  },
+  {
+   "name": "string ascii",
+   "json": "\"skin_red\"",
+   "hex": "0508736b696e5f726564"
+  },
+  {
+   "name": "string 한글",
+   "json": "\"잠뜰\"",
+   "hex": "0506ec9ea0eb9cb0"
+  },
+  {
+   "name": "string emoji",
+   "json": "\"🐟 물고기\"",
+   "hex": "050ef09f909f20ebacbceab3a0eab8b0"
+  },
+  {
+   "name": "string escape",
+   "json": "\"a\\\"b\\\\c\\n\"",
+   "hex": "05066122625c630a"
+  },
+  {
+   "name": "array empty",
+   "json": "[]",
+   "hex": "0600"
+  },
+  {
+   "name": "array mixed",
+   "json": "[1, 2.5, \"x\", null, true, [false]]",
+   "hex": "060603020440040000000000000501780002060101"
+  },
+  {
+   "name": "object empty",
+   "json": "{}",
+   "hex": "0700"
+  },
+  {
+   "name": "object order",
+   "json": "{\"z\": 1, \"a\": {\"k\": [1, 2]}, \"한\": \"글\"}",
+   "hex": "0703017a030201610701016b06020302030403ed959c0503eab880"
+  },
+  {
+   "name": "depth 32",
+   "json": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+   "hex": "06010601060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010600"
+  }
+ ],
+ "s2c": [
+  {
+   "name": "set one",
+   "max": 30000,
+   "ops": [
+    [
+     "NAME",
+     0,
+     "skin"
+    ],
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "SET",
+     0,
+     "\"red\""
+    ]
+   ],
+   "packets": [
+    "010004736b696e026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b04000503726564"
+   ],
+   "shape": [
+    [
+     "NAME",
+     "SUBJECT",
+     "SET"
+    ]
+   ]
+  },
+  {
+   "name": "global set + unset",
+   "max": 30000,
+   "ops": [
+    [
+     "NAME",
+     1,
+     "showNametag"
+    ],
+    [
+     "GLOBAL"
+    ],
+    [
+     "SET",
+     1,
+     "true"
+    ],
+    [
+     "UNSET",
+     1
+    ]
+   ],
+   "packets": [
+    "01010b73686f774e616d65746167030401020501"
+   ],
+   "shape": [
+    [
+     "NAME",
+     "GLOBAL",
+     "SET",
+     "UNSET"
+    ]
+   ]
+  },
+  {
+   "name": "two subjects",
+   "max": 30000,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "SET",
+     0,
+     "1"
+    ],
+    [
+     "SUBJECT",
+     "00000000-0000-0000-0000-000000000001"
+    ],
+    [
+     "SET",
+     0,
+     "2"
+    ],
+    [
+     "DROP"
+    ]
+   ],
+   "packets": [
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b0400030202000000000000000000000000000000010400030407"
+   ],
+   "shape": [
+    [
+     "SUBJECT",
+     "SET",
+     "SUBJECT",
+     "SET",
+     "DROP"
+    ]
+   ]
+  },
+  {
+   "name": "full",
+   "max": 30000,
+   "ops": [
+    [
+     "NAME",
+     0,
+     "a"
+    ],
+    [
+     "NAME",
+     1,
+     "b"
+    ],
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "FULL",
+     [
+      [
+       0,
+       "1"
+      ],
+      [
+       1,
+       "{\"x\": [1, 2.0]}"
+      ]
+     ]
+    ]
+   ],
+   "packets": [
+    "0100016101010162026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b060202000302010701017806020302044000000000000000"
+   ],
+   "shape": [
+    [
+     "NAME",
+     "NAME",
+     "SUBJECT",
+     "FULL"
+    ]
+   ]
+  },
+  {
+   "name": "full empty",
+   "max": 30000,
+   "ops": [
+    [
+     "GLOBAL"
+    ],
+    [
+     "FULL",
+     []
+    ]
+   ],
+   "packets": [
+    "03060000"
+   ],
+   "shape": [
+    [
+     "GLOBAL",
+     "FULL"
+    ]
+   ]
+  },
+  {
+   "name": "signal",
+   "max": 30000,
+   "ops": [
+    [
+     "NAME",
+     7,
+     "shake"
+    ],
+    [
+     "GLOBAL"
+    ],
+    [
+     "SIGNAL",
+     7,
+     "{\"power\": 0.5}"
+    ]
+   ],
+   "packets": [
+    "0107057368616b65030807070105706f776572043fe0000000000000"
+   ],
+   "shape": [
+    [
+     "NAME",
+     "GLOBAL",
+     "SIGNAL"
+    ]
+   ]
+  },
+  {
+   "name": "reset first",
+   "max": 30000,
+   "ops": [
+    [
+     "RESET"
+    ],
+    [
+     "NAME",
+     0,
+     "a"
+    ],
+    [
+     "GLOBAL"
+    ],
+    [
+     "SET",
+     0,
+     "null"
+    ]
+   ],
+   "packets": [
+    "090100016103040000"
+   ],
+   "shape": [
+    [
+     "RESET",
+     "NAME",
+     "GLOBAL",
+     "SET"
+    ]
+   ]
+  },
+  {
+   "name": "name between ctx ops",
+   "max": 30000,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "SET",
+     0,
+     "1"
+    ],
+    [
+     "NAME",
+     3,
+     "late"
+    ],
+    [
+     "SET",
+     3,
+     "2"
+    ]
+   ],
+   "packets": [
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b040003020103046c61746504030304"
+   ],
+   "shape": [
+    [
+     "SUBJECT",
+     "SET",
+     "NAME",
+     "SET"
+    ]
+   ]
+  },
+  {
+   "name": "ctx without op is not written",
+   "max": 30000,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "GLOBAL"
+    ],
+    [
+     "SET",
+     0,
+     "0"
+    ]
+   ],
+   "packets": [
+    "0304000300"
+   ],
+   "shape": [
+    [
+     "GLOBAL",
+     "SET"
+    ]
+   ]
+  },
+  {
+   "name": "split sets",
+   "max": 40,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "SET",
+     0,
+     "\"aaaaaaaaaa\""
+    ],
+    [
+     "SET",
+     1,
+     "\"bbbbbbbbbb\""
+    ],
+    [
+     "SET",
+     2,
+     "\"cccccccccc\""
+    ]
+   ],
+   "packets": [
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b0400050a61616161616161616161",
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b0401050a62626262626262626262",
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b0402050a63636363636363636363"
+   ],
+   "shape": [
+    [
+     "SUBJECT",
+     "SET"
+    ],
+    [
+     "SUBJECT",
+     "SET"
+    ],
+    [
+     "SUBJECT",
+     "SET"
+    ]
+   ]
+  },
+  {
+   "name": "split name then set",
+   "max": 24,
+   "ops": [
+    [
+     "NAME",
+     0,
+     "aaaaaaaaaaaaaaaaa"
+    ],
+    [
+     "GLOBAL"
+    ],
+    [
+     "SET",
+     0,
+     "\"x\""
+    ]
+   ],
+   "packets": [
+    "0100116161616161616161616161616161616161",
+    "030400050178"
+   ],
+   "shape": [
+    [
+     "NAME"
+    ],
+    [
+     "GLOBAL",
+     "SET"
+    ]
+   ]
+  },
+  {
+   "name": "split full",
+   "max": 48,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "FULL",
+     [
+      [
+       0,
+       "\"aaaaaaaaaa\""
+      ],
+      [
+       1,
+       "\"bbbbbbbbbb\""
+      ],
+      [
+       2,
+       "\"cccccccccc\""
+      ],
+      [
+       3,
+       "\"dd\""
+      ]
+     ]
+    ]
+   ],
+   "packets": [
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b06040200050a6161616161616161616101050a62626262626262626262",
+    "026f2b7c1e0d4a4a8e9b1f2c3d4e5f6a7b0a0202050a636363636363636363630305026464"
+   ],
+   "shape": [
+    [
+     "SUBJECT",
+     "FULL"
+    ],
+    [
+     "SUBJECT",
+     "FULL_CONT"
+    ]
+   ]
+  },
+  {
+   "name": "split full after content",
+   "max": 40,
+   "ops": [
+    [
+     "GLOBAL"
+    ],
+    [
+     "SET",
+     9,
+     "\"zzzzzzzzzzzzzzzzzzzzzzz\""
+    ],
+    [
+     "FULL",
+     [
+      [
+       0,
+       "1"
+      ],
+      [
+       1,
+       "2"
+      ]
+     ]
+    ]
+   ],
+   "packets": [
+    "03040905177a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a060202000302010304"
+   ],
+   "shape": [
+    [
+     "GLOBAL",
+     "SET",
+     "FULL"
+    ]
+   ]
+  },
+  {
+   "name": "split full global",
+   "max": 16,
+   "ops": [
+    [
+     "GLOBAL"
+    ],
+    [
+     "FULL",
+     [
+      [
+       0,
+       "\"aaaa\""
+      ],
+      [
+       1,
+       "\"bbbb\""
+      ],
+      [
+       2,
+       "\"cccc\""
+      ]
+     ]
+    ]
+   ],
+   "packets": [
+    "0306030100050461616161",
+    "030a0101050462626262",
+    "030a0102050463636363"
+   ],
+   "shape": [
+    [
+     "GLOBAL",
+     "FULL"
+    ],
+    [
+     "GLOBAL",
+     "FULL_CONT"
+    ],
+    [
+     "GLOBAL",
+     "FULL_CONT"
+    ]
+   ]
+  }
+ ],
+ "s2cErrors": [
+  {
+   "name": "set without subject",
+   "max": 30000,
+   "ops": [
+    [
+     "SET",
+     0,
+     "1"
+    ]
+   ]
+  },
+  {
+   "name": "op bigger than max",
+   "max": 20,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "SET",
+     0,
+     "\"aaaaaaaaaaaaaaaa\""
+    ]
+   ]
+  },
+  {
+   "name": "full entry bigger than max",
+   "max": 24,
+   "ops": [
+    [
+     "SUBJECT",
+     "6f2b7c1e-0d4a-4a8e-9b1f-2c3d4e5f6a7b"
+    ],
+    [
+     "FULL",
+     [
+      [
+       0,
+       "\"aaaaaaaaaaaaaaaaaaaaaaaa\""
+      ]
+     ]
+    ]
+   ]
+  }
+ ],
+ "c2s": [
+  {
+   "name": "hello 1",
+   "op": [
+    "HELLO",
+    1
+   ],
+   "hex": "0101"
+  },
+  {
+   "name": "signal",
+   "op": [
+    "SIGNAL",
+    "jump",
+    "{\"h\": 2}"
+   ],
+   "hex": "02046a756d70070101680304"
+  },
+  {
+   "name": "signal null",
+   "op": [
+    "SIGNAL",
+    "ping",
+    "null"
+   ],
+   "hex": "020470696e6700"
+  }
+ ],
+ "invalid": [
+  {
+   "dir": "s2c",
+   "name": "unknown op",
+   "hex": "0b"
+  },
+  {
+   "dir": "s2c",
+   "name": "op 0",
+   "hex": "00"
+  },
+  {
+   "dir": "s2c",
+   "name": "set without ctx",
+   "hex": "040000"
+  },
+  {
+   "dir": "s2c",
+   "name": "truncated uuid",
+   "hex": "020000000000000000"
+  },
+  {
+   "dir": "s2c",
+   "name": "truncated varint",
+   "hex": "0180"
+  },
+  {
+   "dir": "s2c",
+   "name": "uvarint overflow",
+   "hex": "01ffffffff7f00"
+  },
+  {
+   "dir": "s2c",
+   "name": "bad value tag",
+   "hex": "03040008"
+  },
+  {
+   "dir": "s2c",
+   "name": "string longer than packet",
+   "hex": "0100056162"
+  },
+  {
+   "dir": "s2c",
+   "name": "array count > remaining",
+   "hex": "030400060a00"
+  },
+  {
+   "dir": "s2c",
+   "name": "full n > total",
+   "hex": "0306010200000100"
+  },
+  {
+   "dir": "s2c",
+   "name": "depth 33",
+   "hex": "030400060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010601060106010600"
+  },
+  {
+   "dir": "s2c",
+   "name": "varint64 overflow",
+   "hex": "03040003ffffffffffffffffff7f"
+  },
+  {
+   "dir": "c2s",
+   "name": "trailing bytes",
+   "hex": "010100"
+  },
+  {
+   "dir": "c2s",
+   "name": "unknown c2s op",
+   "hex": "07"
+  },
+  {
+   "dir": "c2s",
+   "name": "empty",
+   "hex": ""
+  }
+ ]
+}
