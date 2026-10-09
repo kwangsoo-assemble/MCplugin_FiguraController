@@ -94,10 +94,17 @@ public final class Dispatcher implements StateStore.ChangeListener {
         return java.util.Collections.unmodifiableSet(sessions.keySet());
     }
 
-    /** 이 클라에 이 대상을 보낸 적이 있나(DROP 이 필요한가) */
+    /**
+     * 그만 볼 때 DROP 이 필요할 수 있나 — 이 클라에 이 대상을 보냈거나, **이번 틱에 보기 시작이 걸려 있다**(틱 끝에 FULL 이 나간다).
+     * ★ 뒤의 것이 없으면 «같은 틱에 보기 시작 → 끝» 에서 끝이 걸러져 FULL 만 나가고 클라에 남는다(2026-10-10 무작위 이어 붙이기 시험 실측).
+     */
     public boolean knows(UUID player, UUID subject) {
         Session s = sessions.get(player);
-        return s != null && s.known.contains(subject);
+        if (s == null) return false;
+        if (s.known.contains(subject)) return true;
+        List<Track> l = tracks.get(player);
+        if (l != null) for (Track t : l) if (t.start() && t.subject().equals(subject)) return true;
+        return false;
     }
 
     // ── 들어오는 것

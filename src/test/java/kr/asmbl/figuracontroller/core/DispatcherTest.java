@@ -228,6 +228,23 @@ class DispatcherTest {
         assertFalse(out.containsKey(P3));
     }
 
+    /** ★ 회귀 — 같은 틱에 보기 시작 → 끝이면 클라에 아무것도 안 남는다(무작위 이어 붙이기 시험이 찾았다) */
+    @Test
+    void trackStartThenStopInSameTickLeavesNothing() {
+        standardInit();
+        d.hello(P3, Protocol.VERSION);
+        flush();
+        view.see(P3, M1);
+        d.trackStart(P3, M1);
+        view.unsee(P3, M1);
+        assertTrue(d.knows(P3, M1), "이번 틱에 시작이 걸려 있으면 DROP 이 필요할 수 있다");
+        d.trackStop(P3, M1);
+        Map<UUID, List<byte[]>> out = flush();
+        List<String> lines = wire.read(out, P3);
+        assertEquals("DROP", lines.get(lines.size() - 1), "FULL 뒤에 DROP — " + lines);
+        assertFalse(d.knows(P3, M1));
+    }
+
     @Test
     void trackStartSameTickAsChangeSendsFullOnly() {
         standardInit();
