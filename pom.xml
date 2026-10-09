@@ -12,6 +12,13 @@
     </properties>
 
     <build>
+        <resources>
+            <!-- plugin.yml 의 ${project.version} -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

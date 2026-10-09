@@ -1,0 +1,15 @@
+# FiguraController 설정 — 바꾸면 서버를 다시 켠다
+
+# 명령이 성공했을 때 친 사람에게 확인 메시지를 보낼까.
+# 기본 끔 — 촬영용 출력 규율(탤런트 화면 · 리플레이에 남는다. 아바타가 /fc 를 직접 치기도 한다).
+# 오류와 조회(state get · status · preset list/show/save/delete · import-legacy)는 늘 보인다.
+commandFeedback: false
+
+# 콘솔 진단 줄 (HELLO · 깨진 패킷 · 저장 못 하는 대상 …)
+debug: false
+
+# 저장 묶기(틱) — 처음 바뀐 뒤 이만큼 지나 한 번 쓴다. 나갈 때 · 끌 때는 바로 쓴다
+saveDelayTicks: 100
+
+# 접속 뒤 이만큼(틱) 지나도 FSB 는 연결됐는데 HELLO 가 없으면 콘솔에 «옛 코어?» 한 줄
+oldCoreWarnTicks: 200

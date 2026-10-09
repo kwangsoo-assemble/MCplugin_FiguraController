@@ -1,0 +1,18 @@
+name: FiguraController
+version: '${project.version}'
+main: kr.asmbl.figuracontroller.bukkit.FiguraControllerPlugin
+api-version: '1.21'
+description: 서버가 주인인 Figura 상태 · 신호 (figuracontroller:v1)
+depend: [FiguraFSB]
+loadbefore: [CommandHelper]
+
+commands:
+  figuracontroller:
+    description: Figura 상태 · 신호 — /fc help
+    aliases: [fc]
+    permission: figuracontroller.command
+
+permissions:
+  figuracontroller.command:
+    description: /fc
+    default: op
