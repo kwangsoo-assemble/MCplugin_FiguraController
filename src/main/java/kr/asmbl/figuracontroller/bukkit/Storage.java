@@ -66,7 +66,6 @@ final class Storage {
     private final ConcurrentHashMap<UUID, JsonObject> preloaded = new ConcurrentHashMap<>();
     private final Map<UUID, Long> due = new HashMap<>();
     private final Set<UUID> pdcDirty = new LinkedHashSet<>();
-    private final Set<UUID> declaredPlayers = new java.util.HashSet<>();
 
     Storage(JavaPlugin plugin, StateStore store, Dispatcher dispatcher, Settings settings) {
         this.plugin = plugin;
@@ -107,15 +106,7 @@ final class Storage {
     }
 
     boolean isKnownPlayer(UUID id) {
-        return declaredPlayers.contains(id) || playerFile(id).exists() || Bukkit.getOfflinePlayer(id).hasPlayedBefore();
-    }
-
-    /**
-     * 이 UUID 는 플레이어다(파일에 저장한다) — `import-legacy` 가 부른다. 옛 CH 저장은 플레이어만 담았는데, 이 서버에 접속한 적이 없는
-     * UUID(다른 서버에서 옮겨 온 것)는 «모르는 대상» 으로 메모리에만 남아 재시작에 사라졌다(2026-10-10 연기 시험 실측).
-     */
-    void declarePlayer(UUID id) {
-        declaredPlayers.add(id);
+        return playerFile(id).exists() || Bukkit.getOfflinePlayer(id).hasPlayedBefore();
     }
 
     // ── 틱

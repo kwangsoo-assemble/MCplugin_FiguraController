@@ -2,7 +2,8 @@
 
 # 명령이 성공했을 때 친 사람에게 확인 메시지를 보낼까.
 # 기본 끔 — 촬영용 출력 규율(탤런트 화면 · 리플레이에 남는다. 아바타가 /fc 를 직접 치기도 한다).
-# 오류와 조회(state get · status · preset list/show/save/delete · import-legacy)는 늘 보인다.
+# 오류와 조회(state get · status · preset list/show/save/delete)는 늘 보인다.
+# ⓘ 탭 자동완성 후보는 이 파일이 아니라 completions/*.yml — 저장하면 재시작 없이 바로 반영된다.
 commandFeedback: false
 
 # 콘솔 진단 줄 (HELLO · 깨진 패킷 · 저장 못 하는 대상 …)

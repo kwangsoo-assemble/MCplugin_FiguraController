@@ -35,6 +35,7 @@
   a client starts tracking it, and the client drops it when tracking ends
 - **Avatar → server** — a host avatar sends a signal with `server_data:send(name, data)` (signals sent by someone else's avatar copy are dropped)
 - **Replay (Flashback)** — the client fork writes the whole store into every recording snapshot, so seeking restores the values of that moment
+- **Tab completion** — `completions/*.yml` lists value candidates per state and signal (named lists · online players · values in use · integer ranges). Saving the file applies it without a restart
 
 ## Usage (short)
 
@@ -60,7 +61,7 @@ server_data.SIGNAL:register(function(name, data, subject) end)
 server_data:send("JUMP_PAD", { power = 3 })         -- host avatar only
 ```
 
-- **Full usage** (Java API · Bukkit events · `/fc` · Lua · receivers · storage format · config · diagnostics) — [`API.md`](API.md) (Korean)
+- **Full usage** (Java API · Bukkit events · `/fc` · tab completion · Lua · receivers · storage format · config · diagnostics) — [`API.md`](API.md) (Korean)
 - CommandHelper functions (`fc_state_set` and so on) come from a separate CommandHelper extension — not in this repository
 
 ## Storage · config
@@ -71,6 +72,7 @@ plugins/FiguraController/
   global.json              global states
   players/<uuid>.json      player states
   presets/<name>.json      presets (default is created on first run)
+  completions/*.yml        tab-completion candidates (per state · signal · a sample default.yml on first run)
 entity PDC  figuracontroller:states   mob states
 ```
 
@@ -132,6 +134,7 @@ the same files — change both together when the protocol changes. Test vectors 
 - **받는 사람** — 플레이어 · 몹 상태는 그 대상을 **보고 있는** 클라(+ 본인)에게만 간다. 다가오면 그 순간 전부가 가고, 멀어지면 클라가 버린다
 - **아바타 → 서버** — 호스트 아바타가 `server_data:send(name, data)` 로 신호를 보낸다(남의 아바타 사본이 보낸 것은 버린다)
 - **리플레이(Flashback)** — 클라 포크가 녹화 스냅샷마다 저장소 전체를 넣어, 되감아도 그 시점 값이 된다
+- **탭 자동완성** — `completions/*.yml` 에 상태 · 신호마다 값 후보를 적는다(이름 붙인 목록 · 접속한 사람 · 지금 쓰이는 값 · 정수 범위). 저장하면 재시작 없이 반영된다
 
 ## 쓰는 법 (짧게)
 
@@ -157,7 +160,7 @@ server_data.SIGNAL:register(function(name, data, subject) end)
 server_data:send("JUMP_PAD", { power = 3 })         -- 호스트 아바타만
 ```
 
-- **전체 사용법**(Java API · Bukkit 이벤트 · `/fc` · Lua · 받는 사람 · 저장 형식 · 설정 · 진단) — [`API.md`](API.md)
+- **전체 사용법**(Java API · Bukkit 이벤트 · `/fc` · 탭 자동완성 · Lua · 받는 사람 · 저장 형식 · 설정 · 진단) — [`API.md`](API.md)
 - CommandHelper 에서 쓰는 함수(`fc_state_set` 등)는 별도 CommandHelper 확장이 제공한다 — 이 저장소에는 없다
 
 ## 저장 · 설정
@@ -168,6 +171,7 @@ plugins/FiguraController/
   global.json              전역 상태
   players/<uuid>.json      플레이어 상태
   presets/<이름>.json      프리셋 (첫 실행에 default)
+  completions/*.yml        탭 자동완성 후보 (상태 · 신호별 · 첫 실행에 본보기 default.yml)
 엔티티 PDC  figuracontroller:states   몹 상태
 ```
 

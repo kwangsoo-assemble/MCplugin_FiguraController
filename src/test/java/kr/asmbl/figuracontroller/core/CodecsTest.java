@@ -75,19 +75,6 @@ class CodecsTest {
     }
 
     @Test
-    void legacyImport() {
-        // 라이브 `persistence/` 꼴 그대로 — update 칸 · remains* · 부라더 찌꺼기 · nickName 의 옛 `update: ""` 버그
-        String legacy = "{\"regions\":{\"update\":1791451625467,\"value\":[]},\"remainsLuck\":{\"update\":1,\"value\":0},"
-                + "\"remainsUnluck\":{\"update\":1,\"value\":0},\"endingMode\":{\"update\":1,\"value\":false},"
-                + "\"nickName\":{\"update\":\"\",\"value\":null},\"broken\":3,\"fcBench\":{\"update\":1,\"value\":1}}";
-        LegacyImport.Result r = LegacyImport.parse(JsonParser.parseString(legacy).getAsJsonObject());
-        assertEquals(List.of("regions", "nickName"), new ArrayList<>(r.keep().keySet()));
-        assertTrue(r.keep().get("nickName").isJsonNull(), "null 은 값이다");
-        assertEquals(List.of("remainsLuck", "remainsUnluck", "endingMode", "fcBench"), r.dropped());
-        assertEquals(List.of("broken"), r.broken());
-    }
-
-    @Test
     void commandValues() {
         assertEquals(new JsonPrimitive("RATH4R"), ValueParse.jsonOrString("RATH4R"));
         assertEquals(new JsonPrimitive(true), ValueParse.jsonOrString("true"));
@@ -101,18 +88,6 @@ class CodecsTest {
         assertTrue(arr.isJsonArray());
         assertEquals(kr.asmbl.figuracontroller.protocol.Protocol.T_INT, kr.asmbl.figuracontroller.protocol.Values.encode(ValueParse.jsonOrString("3"))[0]);
         assertEquals(kr.asmbl.figuracontroller.protocol.Protocol.T_DOUBLE, kr.asmbl.figuracontroller.protocol.Values.encode(ValueParse.jsonOrString("3.0"))[0]);
-    }
-
-    @Test
-    void legacyValues() {
-        assertEquals(new JsonPrimitive(true), ValueParse.legacy("TRUE"));
-        assertTrue(ValueParse.legacy("Null").isJsonNull());
-        assertEquals(new JsonPrimitive(7L), ValueParse.legacy("7"));
-        assertEquals(new JsonPrimitive(1.5), ValueParse.legacy("1.5"));
-        assertEquals(new JsonPrimitive("라더"), ValueParse.legacy("라더"));
-        assertEquals(new JsonPrimitive("[1,2]"), ValueParse.legacy("[1,2]"), "옛 문법은 묶음을 못 쓴다");
-        assertTrue(ValueParse.isLegacyRemove("~none"));
-        assertFalse(ValueParse.isLegacyRemove("none"));
     }
 
     @Test

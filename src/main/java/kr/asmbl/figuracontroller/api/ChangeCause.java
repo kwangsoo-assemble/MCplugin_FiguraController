@@ -11,7 +11,5 @@ public enum ChangeCause {
     /** 만료(`expireTicks`) */
     EXPIRE,
     /** `clear` */
-    CLEAR,
-    /** 옛 CH 저장 가져오기 */
-    IMPORT
+    CLEAR
 }

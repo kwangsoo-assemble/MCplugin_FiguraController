@@ -78,7 +78,10 @@ public final class FiguraControllerPlugin extends JavaPlugin implements Listener
 
         getServer().getPluginManager().registerEvents(new Listeners(this, store, dispatcher, storage), this);
         FiguraFSBApi.onServerPacket(Protocol.CHANNEL, this::onPacket);
-        FcCommand fc = new FcCommand(this, api, store, dispatcher, storage, presets);
+        CompletionStore completions = new CompletionStore(new java.io.File(getDataFolder(), "completions"), getLogger());
+        completions.ensureDefault(this);
+        completions.rules(); // 켤 때 한 번 읽어 경고를 콘솔에
+        FcCommand fc = new FcCommand(this, api, store, dispatcher, storage, presets, completions);
         PluginCommand cmd = getCommand("figuracontroller");
         if (cmd != null) {
             cmd.setExecutor(fc);

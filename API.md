@@ -24,7 +24,7 @@ CH 「플레이어 피구라 컨트롤러」를 갈음한다 (2026-10-10 배포 
 |---|---|---|
 | 플레이어 | 그 플레이어의 아바타 | 이름 · UUID · 선택자(`@p` …) |
 | 몹 | 그 엔티티에 입힌 몹(CEM) 아바타 | UUID · 선택자(`@e[type=husk,limit=1]`) |
-| 전역 | 모든 아바타가 «자기 값이 없을 때» 보는 값 | `global` (`~global` 도 된다) |
+| 전역 | 모든 아바타가 «자기 값이 없을 때» 보는 값 | `global` |
 
 ### 상태 하나의 속성
 | 속성 | 기본 | 뜻 |
@@ -74,13 +74,43 @@ CH 「플레이어 피구라 컨트롤러」를 갈음한다 (2026-10-10 배포 
 /fc state clear  <대상> | all confirm          -- all = 전역 + 모든 대상 + 저장 파일
 /fc signal       <대상> <이름> [데이터] [--to self|trackers|all]
 /fc preset list | show <이름> | save <이름> <대상> [상태…] | load <이름> <대상…> | delete <이름>
-/fc status [대상]                               -- 준비된 클라 · 규약판 · 메모리 대상 · 보낸 패킷
-/fc import-legacy <폴더> [--dry-run]            -- 옛 CH persistence/ 가져오기 (한 번)
+/fc status [대상]                               -- 준비된 클라 · 규약판 · 메모리 대상 · 보낸 패킷 · 자동완성 파일
 ```
 - 값 = JSON(`true` · `3` · `1.5` · `"글"` · `[1,2]` · `{"x":1}` · `null`) — JSON 이 아니면 글로 읽는다(`RATH4R`)
 - `--transient` = `persist` 끔
 - 출력: **친 사람에게만** · 성공 확인은 기본 끔(`commandFeedback`) — 탤런트 화면 · 리플레이에 안 남게. 오류와 조회는 늘 보인다
-- ⚠ **옛 문법(임시)**: `/fc <대상> state [이름] [값|~none]` · `/fc <대상> signal <이름> [데이터]` — 아바타가 직접 치는 곳(마도사 · 베리티) 때문에 받아 준다 · 쓰이면 콘솔에 한 번 «옛 문법» · 나중에 지운다
+- 하위 명령이 **먼저** 온다 — `/fc <대상> state …` 꼴은 «모르는 하위 명령» 오류다
+
+### 탭 자동완성 — `completions/*.yml`
+값 · 이름 후보를 **상태 · 신호마다** 정한다. 데이터 폴더 `completions/` 의 `*.yml` 을 **전부 합쳐** 쓴다(파일 이름 순 · 파일 안은 적은 순) —
+콘텐츠마다 파일 하나를 두면 된다. **저장하면 다음 탭부터 바로** 반영된다(재시작 없음). 처음 켤 때 폴더가 없으면 본보기 `default.yml` 을 놓는다.
+
+```yaml
+lists:                                   # 이름 붙인 값 목록 — 후보에서 $이름 으로 부른다
+  talentAccount: [RATH4R, DUCKGAE, Heptagram]
+  talentKorean:  [라더, 덕개, 각별]
+states:                                  # 상태 이름 → 값 후보 (/fc state set <대상> <이름> <값>)
+  skin: [$talentAccount, null]
+  nickName|listName|chatName|plateName: [$talentKorean, null]
+  disguise: [0..5]
+  seeker: [$online]
+  phase: [$used, lobby]
+signals:                                 # 신호 이름 → 데이터 후보 (/fc signal <대상> <이름> [데이터])
+  SCREENSHAKE: ['{"power":1}']
+```
+| 후보 | 뜻 |
+|---|---|
+| 글자 그대로 | 적은 그대로 들어간다 — `RATH4R` · `true` · `3` · `null` · `'"띄어 쓴 글"'` · `'{"x":1}'` (`[` · `{` 로 시작하는 JSON 은 작은따옴표로) |
+| `$목록이름` | `lists` 의 목록 |
+| `$online` | 지금 접속한 플레이어 이름 |
+| `$used` | 지금 누가(전역 · 플레이어 · 몹) 그 상태에 가진 값들 — 상태에만 |
+| `0..5` | 정수 범위(200개까지) |
+| `$$글` | `$` 로 시작하는 글자 |
+
+- 이름 칸: 정확한 이름 · `*`(아무 글자 — `*` 로 시작하면 따옴표: `"*Name"`) · `|`(여럿). **정확히 적은 이름은 아직 아무도 그 상태를 안 가졌어도 이름 후보에 뜬다**
+- YAML 은 **글자로만** 읽는다 — 따옴표 없는 `on` · `no` · `1:30` 도 그대로다(불 · 수로 안 바뀐다)
+- 규칙이 없는 상태는 `true` · `false` · `null` · 후보를 하나도 안 띄우려면 `[]`
+- 잘못 적은 칸(모르는 목록 · 꼴이 틀림 · 못 읽는 파일)은 **건너뛰고** 서버 콘솔에 한 번 — `/fc status` 끝 줄에 파일 · 규칙 · 경고 수
 
 ---
 
@@ -88,7 +118,7 @@ CH 「플레이어 피구라 컨트롤러」를 갈음한다 (2026-10-10 배포 
 
 ```xml
 <dependency>  <!-- 이 저장소에서 mvnw install -->
-  <groupId>kr.asmbl</groupId><artifactId>figuracontroller</artifactId><version>0.1.0</version><scope>provided</scope>
+  <groupId>kr.asmbl</groupId><artifactId>figuracontroller</artifactId><version>0.2.0</version><scope>provided</scope>
 </dependency>
 ```
 `plugin.yml` 에 `depend: [FiguraController]`(또는 softdepend 뒤 `isPluginEnabled` 확인).
@@ -114,12 +144,12 @@ api.applyPreset("default", List.of(uuid1, uuid2));  api.presets();
 **이벤트 (Bukkit)**
 | 이벤트 | 언제 | 내용 |
 |---|---|---|
-| `FiguraStateChangeEvent` | 상태가 **바뀐 뒤**(동기) | `getSubject()`(전역이면 null · `isGlobal()`) · `getName()` · `getOldValue()` · `getNewValue()`(지웠으면 null) · `getCause()` = `API` · `COMMAND` · `PRESET` · `EXPIRE` · `CLEAR` · `IMPORT` |
+| `FiguraStateChangeEvent` | 상태가 **바뀐 뒤**(동기) | `getSubject()`(전역이면 null · `isGlobal()`) · `getName()` · `getOldValue()` · `getNewValue()`(지웠으면 null) · `getCause()` = `API` · `COMMAND` · `PRESET` · `EXPIRE` · `CLEAR` |
 | `FiguraSignalReceiveEvent` | 아바타 → 서버 신호 | `getPlayer()` · `getName()` · `getData()` — **그 플레이어의 호스트 아바타가 보낸 것만**(남의 아바타가 보낸 것은 버린다) |
 
 ---
 
-## 4. CommandHelper (CHFeatures 0.9.0)
+## 4. CommandHelper (CHFeatures 0.9.1)
 
 | 함수 | 돌려줌 | 뜻 |
 |---|---|---|
@@ -127,7 +157,7 @@ api.applyPreset("default", List.of(uuid1, uuid2));  api.presets();
 | `fc_state_get_all(대상)` | 연관 배열(사본) | |
 | `fc_state_set(대상, 이름, 값, [옵션])` | 바뀌었나 | 옵션 `array('persist': bool, 'private': bool, 'expire': 틱)` |
 | `fc_states_set(대상, 연관 배열, [옵션])` | 바뀐 수 | |
-| `fc_state_unset(대상, 이름)` | 있었나 | (옛 `'~none'`) |
+| `fc_state_unset(대상, 이름)` | 있었나 | |
 | `fc_state_clear(대상)` | 지운 수 | |
 | `fc_signal_send(대상, 이름, [데이터], [받는 사람])` | — | `'trackers'`(기본) · `'self'` · `'all'` · 플레이어 배열 · 전역 대상은 늘 전원(배열이면 그들만) |
 | `fc_preset_load(프리셋, 대상 \| 대상 배열)` | 바뀐 수 | 플레이어 · 몹만(전역은 `/fc preset load <이름> global`) |
@@ -150,20 +180,6 @@ bind('fc_signal', null, array('name': 'HITBOX_HIT'), @e) {
 ```
 ⚠ `bind` 몸은 클로저가 아니다 — **바깥 변수를 못 본다**(필요하면 proc · `import`).
 
-**옛 CH proc (임시 껍데기)** — `includes/system/player_figura_controller/fc_main.ms` 가 옛 이름을 위 함수로 잇는다(쓰이면 콘솔에 proc 마다 한 번). 새 코드는 쓰지 않는다:
-
-| 옛 | 새 |
-|---|---|
-| `_set_state(@p, n, v)` · `'~none'` | `fc_state_set(@p, n, v)` · `fc_state_unset(@p, n)` |
-| `_set_states(@p, array(...))` | `fc_states_set(@p, array(...))` |
-| `_get_state(@p, n)` · `_get_states` | `fc_state_get(@p, n)` · `fc_state_get_all(@p)` |
-| `_set_global_state(n, v)` · `_get_global_state(n)` | `fc_state_set('global', n, v)` · `fc_state_get('global', n)` |
-| `_send_signal(@p, n, d)` | `fc_signal_send(@p, n, d)` |
-| `_send_host_signal(@p, n, d)` | `fc_signal_send(@p, n, d, 'self')` |
-| `_register_custom_signal_callback(n, closure(@e) {…})` | `bind('fc_signal', null, array('name': n), @e) {…}` |
-| `_register_state_change_callback(n, closure(@e) {…})` | `bind('fc_state_changed', null, array('name': n), @e) {…}` |
-| `_send_states` · `_send_states_full` · `_init_states` · `_save_states` | 필요 없다(플러그인이 한다) |
-
 ---
 
 ## 5. Lua (아바타)
@@ -184,7 +200,7 @@ server_data:send("JUMP_PAD", { power = 3 })  -- 아바타 → 서버 · 호스�
 - `subject` = UUID 글 · 전역이면 nil · 표 값은 **읽기 전용**(고치면 오류)
 - 전역 바뀜은 **자기 값이 없는** 아바타에만 온다 · 전역 신호는 이 클라의 **모든 아바타 인스턴스**에 온다(클라당 한 번이면 `host:isHost()`)
 
-### 하네스 템플릿 (옛 이름 그대로)
+### 하네스 템플릿 (`modelManager` · `entityManager`)
 - 플레이어 템플릿: `modelManager.serverData[name]` → `{ value = 값 }` 또는 nil(읽기 전용) · `modelManager.events.state_changed(name, old, new)` · `signal_received(name, data)` · `modelManager.sendSignal(name, data)` — 표 값은 고쳐도 되는 사본
 - 몹 템플릿: `entityManager.state(name)` · `entityManager.onState(name|nil, fn(name, new, old, initial))` · `entityManager.onSignal(name|nil, fn(name, data))` — 오류 가두기 그대로
 - 정본: 하네스 `knowledge/figura/avatar_system.md` §5 · `knowledge/figura/entity_avatar_system.md`
@@ -199,16 +215,17 @@ plugins/FiguraController/
   global.json                 전역
   players/<uuid>.json         플레이어 (접속 전 AsyncPlayerPreLogin 에서 미리 읽는다)
   presets/<이름>.json         프리셋 (첫 실행에 default)
+  completions/*.yml           탭 자동완성 후보 (폴더가 없으면 본보기 default.yml — §2)
 엔티티 PDC  figuracontroller:states   몹 (엔티티가 월드에 들어올 때 읽고 · 바뀐 틱 끝에 바로 쓴다 · 월드에서 빠지면 메모리에서 뺀다)
 ```
 - 형식(셋 다 같다): `{"version": 1, "states": {"skin": {"value": "A"}, "secret": {"value": 1, "private": true}, "buff": {"value": true, "expireIn": 200}}}` — `persist` 인 것만
 - 쓰는 때: 처음 바뀐 뒤 `saveDelayTicks`(100) 지나 한 번 · 나갈 때 · 끌 때 · 비동기(IO 스레드) · 원자적 쓰기
 - 프리셋: `{이름: {value, persist?, private?}}` · `default` = `nickName` · `listName` · `chatName` · `plateName` · `skin` · `isArmWide` = null · `showNametag` = true
-- **CH `/rc` 는 상태를 안 건드린다**(옛 CH 컨트롤러는 날렸다)
+- **CH `/rc` 는 상태를 안 건드린다**
 
 ---
 
-## 7. 설정 `config.yml` (바꾸면 서버를 다시 켠다)
+## 7. 설정 `config.yml` (바꾸면 서버를 다시 켠다 · 자동완성은 여기가 아니라 `completions/` — 재시작 없음)
 | 키 | 기본 | 뜻 |
 |---|---|---|
 | `commandFeedback` | false | 명령 성공 확인을 친 사람에게 |

@@ -3,13 +3,12 @@ package kr.asmbl.figuracontroller.bukkit;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import kr.asmbl.figuracontroller.api.Audience;
 import kr.asmbl.figuracontroller.api.ChangeCause;
 import kr.asmbl.figuracontroller.api.StateOptions;
+import kr.asmbl.figuracontroller.core.CompletionRules;
 import kr.asmbl.figuracontroller.core.Dispatcher;
 import kr.asmbl.figuracontroller.core.Entry;
-import kr.asmbl.figuracontroller.core.LegacyImport;
 import kr.asmbl.figuracontroller.core.PresetCodec;
 import kr.asmbl.figuracontroller.core.StateStore;
 import kr.asmbl.figuracontroller.core.SubjectState;
@@ -23,13 +22,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,8 +36,9 @@ import java.util.UUID;
  * `/fc` (설계 §4.6). 대상 = 플레이어 이름 · 선택자(`@e[type=husk,limit=1]`) · UUID · `global`.
  * 값 = 엄격한 JSON(`true` · `3` · `1.5` · `"글"` · `[1,2]` · `{"x":1}` · `null`) · 아니면 글 그대로(`RATH4R`).
  * <p>
- * 출력 — 촬영용 출력 규율: **성공 확인은 기본 끔**(`config.yml` `commandFeedback`) · 오류와 조회(get · status · preset list/show/save/delete · import)는 친 사람에게 ·
- * 콘솔은 조용히. ★ 옛 문법 별칭(임시 — T11 에서 지운다): `/fc <대상> state [이름] [값|~none]` · `/fc <대상> signal <이름> [데이터]` — 아바타가 직접 친다(research §6 ⚠).
+ * 출력 — 촬영용 출력 규율: **성공 확인은 기본 끔**(`config.yml` `commandFeedback`) · 오류와 조회(get · status · preset list/show/save/delete)는 친 사람에게 ·
+ * 콘솔은 조용히. 탭 자동완성의 값 · 이름 후보는 데이터 폴더 `completions/*.yml`({@link CompletionStore} · {@link CompletionRules}).
+ * ⓘ 옛 CH 문법 별칭(`/fc <대상> state …`) · `import-legacy` · `~global` 은 0.2.0 에서 지웠다(하네스 T11).
  */
 final class FcCommand implements TabExecutor {
     interface Host {
@@ -56,7 +52,7 @@ final class FcCommand implements TabExecutor {
         java.util.logging.Logger logger();
     }
 
-    private static final List<String> SUBS = List.of("state", "signal", "preset", "status", "import-legacy");
+    private static final List<String> SUBS = List.of("state", "signal", "preset", "status", "help");
 
     private final Host host;
     private final ApiImpl api;
@@ -64,15 +60,16 @@ final class FcCommand implements TabExecutor {
     private final Dispatcher dispatcher;
     private final Storage storage;
     private final PresetStore presets;
-    private boolean legacyWarned;
+    private final CompletionStore completions;
 
-    FcCommand(Host host, ApiImpl api, StateStore store, Dispatcher dispatcher, Storage storage, PresetStore presets) {
+    FcCommand(Host host, ApiImpl api, StateStore store, Dispatcher dispatcher, Storage storage, PresetStore presets, CompletionStore completions) {
         this.host = host;
         this.api = api;
         this.store = store;
         this.dispatcher = dispatcher;
         this.storage = storage;
         this.presets = presets;
+        this.completions = completions;
     }
 
     static final class CmdError extends RuntimeException {
@@ -133,12 +130,8 @@ final class FcCommand implements TabExecutor {
                 case "signal" -> signal(s, args);
                 case "preset" -> preset(s, args);
                 case "status" -> status(s, args);
-                case "import-legacy" -> importLegacy(s, args);
                 case "help" -> usage(s);
-                default -> {
-                    if (args.length >= 2 && (args[1].equalsIgnoreCase("state") || args[1].equalsIgnoreCase("signal"))) legacy(s, args);
-                    else usage(s);
-                }
+                default -> throw new CmdError("모르는 하위 명령: " + args[0] + " — 하위 명령이 먼저 온다(/fc state set <대상> <이름> <값>) · /fc help");
             }
         } catch (CmdError | IllegalArgumentException e) {
             s.sendMessage("§c" + e.getMessage());
@@ -154,7 +147,7 @@ final class FcCommand implements TabExecutor {
         s.sendMessage("§e/fc state unset <대상> <이름> §7· §e/fc state clear <대상> | all confirm");
         s.sendMessage("§e/fc signal <대상> <이름> [데이터] §7[--to self|trackers|all]");
         s.sendMessage("§e/fc preset list | show <이름> | save <이름> <대상> [상태…] | load <이름> <대상…> | delete <이름>");
-        s.sendMessage("§e/fc status [대상] §7· §e/fc import-legacy <폴더> [--dry-run]");
+        s.sendMessage("§e/fc status [대상] §7— 자동완성 후보는 plugins/FiguraController/completions/*.yml");
         s.sendMessage("§7대상 = 플레이어 이름 · 선택자 · UUID · global — 값 = JSON(아니면 글)");
     }
 
@@ -277,6 +270,7 @@ final class FcCommand implements TabExecutor {
         if (!noHello.isEmpty()) s.sendMessage("§cFSB 연결 · HELLO 없음(옛 코어?) " + noHello.size() + ": §f" + String.join(" ", noHello));
         s.sendMessage("§7메모리 대상: 접속한 플레이어 " + players + " · 몹 " + mobs + " · 그 밖(접속 안 함 · 저장 대기) " + other + " · 전역 상태 " + store.global().entries().size());
         s.sendMessage("§7저장 대기 " + storage.pendingSaves() + " · 보낸 패킷 " + st[0] + " · " + st[1] + " B (켠 뒤로)");
+        s.sendMessage("§7" + completions.summary());
     }
 
     private void statusOf(CommandSender s, UUID t) {
@@ -299,110 +293,6 @@ final class FcCommand implements TabExecutor {
         Entity e = Bukkit.getEntity(t);
         if (e != null) for (Player p : e.getTrackedBy()) if (dispatcher.isReady(p.getUniqueId())) rec.add(p.getName());
         s.sendMessage("§7공개 상태를 받는 클라 " + rec.size() + ": §f" + String.join(" ", rec));
-    }
-
-    private void importLegacy(CommandSender s, String[] args) throws IOException {
-        Flags f = flags(args, 1);
-        if (f.rest().isEmpty()) throw new CmdError("/fc import-legacy <폴더> [--dry-run] — 예: plugins/CommandHelper/includes/system/player_figura_controller/persistence");
-        File dir = new File(f.rest().get(0));
-        if (!dir.isAbsolute()) dir = new File(System.getProperty("user.dir"), f.rest().get(0));
-        if (!dir.isDirectory()) throw new CmdError("폴더가 없다: " + dir);
-        File[] files = dir.listFiles((d, n) -> n.endsWith(".json"));
-        if (files == null || files.length == 0) throw new CmdError("JSON 이 없다: " + dir);
-        Arrays.sort(files);
-        int subjects = 0;
-        int kept = 0;
-        Set<String> dropped = new TreeSet<>();
-        List<String> broken = new ArrayList<>();
-        List<String> badFiles = new ArrayList<>();
-        for (File file : files) {
-            String base = file.getName().substring(0, file.getName().length() - 5);
-            UUID subj;
-            if (base.equals("~global")) {
-                subj = null;
-            } else {
-                try {
-                    subj = UUID.fromString(base);
-                } catch (IllegalArgumentException e) {
-                    badFiles.add(file.getName());
-                    continue;
-                }
-            }
-            LegacyImport.Result r;
-            try {
-                r = LegacyImport.parse(JsonParser.parseString(Files.readString(file.toPath(), StandardCharsets.UTF_8)).getAsJsonObject());
-            } catch (RuntimeException e) {
-                badFiles.add(file.getName());
-                continue;
-            }
-            subjects++;
-            kept += r.keep().size();
-            dropped.addAll(r.dropped());
-            for (String b : r.broken()) broken.add(base + ":" + b);
-            if (!f.dryRun()) {
-                if (subj != null) storage.declarePlayer(subj); // 옛 저장은 플레이어만 — 이 서버에 접속한 적이 없어도 파일로
-                for (Map.Entry<String, JsonElement> e : r.keep().entrySet()) {
-                    api.setInternal(subj, e.getKey(), e.getValue(), StateOptions.DEFAULT, ChangeCause.IMPORT);
-                }
-            }
-        }
-        s.sendMessage((f.dryRun() ? "§e[시험] " : "§a") + "가져오기 — 대상 " + subjects + " · 상태 " + kept + (f.dryRun() ? " (안 썼다)" : ""));
-        if (!dropped.isEmpty()) s.sendMessage("§7버림: " + String.join(" ", dropped));
-        if (!broken.isEmpty()) s.sendMessage("§c깨진 칸: " + String.join(" ", broken));
-        if (!badFiles.isEmpty()) s.sendMessage("§c못 읽은 파일: " + String.join(" ", badFiles));
-        host.logger().info("import-legacy " + dir + (f.dryRun() ? " (dry-run)" : "") + " — 대상 " + subjects + " · 상태 " + kept + " · 버림 " + dropped);
-    }
-
-    /** 옛 문법 — 옛 CH 와 같게: 대상은 접속한 플레이어 · `~global` · 바꾸면 아무 말 안 함 · 지움 = `~none` */
-    private void legacy(CommandSender s, String[] args) {
-        if (!legacyWarned) {
-            legacyWarned = true;
-            host.logger().info("옛 /fc 문법이 쓰였다(임시 별칭 — 나중에 지운다): /fc " + String.join(" ", args));
-        }
-        boolean global = args[0].equals("~global");
-        UUID subj = null;
-        if (!global) {
-            Player p = Bukkit.getPlayerExact(args[0]);
-            if (p == null) return;
-            subj = p.getUniqueId();
-        }
-        if (args[1].equalsIgnoreCase("state")) {
-            if (args.length <= 3) {
-                legacyPrint(s, subj, args.length == 3 ? args[2] : null);
-                return;
-            }
-            String raw = String.join(" ", Arrays.copyOfRange(args, 3, args.length));
-            if (ValueParse.isLegacyRemove(raw)) api.unsetInternal(subj, args[2], ChangeCause.COMMAND);
-            else api.setInternal(subj, args[2], ValueParse.legacy(raw), StateOptions.DEFAULT, ChangeCause.COMMAND);
-        } else {
-            if (global || args.length < 3) return;
-            JsonElement data = args.length > 3 ? ValueParse.legacy(String.join(" ", Arrays.copyOfRange(args, 3, args.length))) : JsonNull.INSTANCE;
-            api.signalInternal(subj, args[2], data, Audience.TRACKERS);
-        }
-    }
-
-    /** 옛 출력 — 플레이어면 전역과 합쳐 보이고 전역에서만 온 것은 회색 */
-    private void legacyPrint(CommandSender s, UUID subj, String name) {
-        Map<String, String> merged = new LinkedHashMap<>();
-        Map<String, Boolean> fromGlobal = new LinkedHashMap<>();
-        for (Map.Entry<String, Entry> e : store.global().entries().entrySet()) {
-            merged.put(e.getKey(), e.getValue().value.toString());
-            fromGlobal.put(e.getKey(), subj != null);
-        }
-        SubjectState ss = subj == null ? null : store.subject(subj);
-        if (ss != null) for (Map.Entry<String, Entry> e : ss.entries().entrySet()) {
-            merged.put(e.getKey(), e.getValue().value.toString());
-            fromGlobal.put(e.getKey(), false);
-        }
-        String who = subj == null ? "글로벌" : describe(subj);
-        if (name != null) {
-            if (merged.containsKey(name)) s.sendMessage((fromGlobal.get(name) ? "§7" : "") + name + " : " + merged.get(name));
-            else s.sendMessage(name + " : §c(데이터 없음)");
-            return;
-        }
-        s.sendMessage(who + " 상태 :");
-        if (merged.isEmpty()) s.sendMessage(" §7(데이터 없음)");
-        for (Map.Entry<String, String> e : merged.entrySet()) s.sendMessage((fromGlobal.get(e.getKey()) ? "§7" : "") + " " + e.getKey() + " : " + e.getValue());
     }
 
     private void printStates(CommandSender s, UUID t, String name) {
@@ -447,7 +337,7 @@ final class FcCommand implements TabExecutor {
     /** null 원소 = 전역 */
     private static List<UUID> targets(CommandSender s, String t) {
         List<UUID> out = new ArrayList<>();
-        if (t.equalsIgnoreCase("global") || t.equals("~global")) {
+        if (t.equalsIgnoreCase("global")) {
             out.add(null);
             return out;
         }
@@ -499,17 +389,24 @@ final class FcCommand implements TabExecutor {
                         if (args[1].equalsIgnoreCase("clear")) c.add("all");
                     } else if (args.length == 4) {
                         if (args[1].equalsIgnoreCase("clear") && args[2].equalsIgnoreCase("all")) c.add("confirm");
-                        else c.addAll(nameHints(s, args[2]));
+                        else if (!args[1].equalsIgnoreCase("clear")) c.addAll(nameHints(s, args[2]));
                     } else if (args[1].equalsIgnoreCase("set")) {
-                        if (args.length == 5) c.addAll(List.of("true", "false", "null"));
-                        else c.addAll(List.of("--private", "--transient", "--expire"));
+                        if (args.length == 5) {
+                            List<String> v = completions.rules().stateValues(args[3], ctx());
+                            c.addAll(v != null ? v : List.of("true", "false", "null"));
+                        } else c.addAll(List.of("--private", "--transient", "--expire"));
                     }
                 }
                 case "signal" -> {
                     if (args.length == 2) c.addAll(targetHints());
-                    else if (args.length >= 4) {
-                        if (args[args.length - 2].equals("--to")) c.addAll(List.of("self", "trackers", "all"));
-                        else c.add("--to");
+                    else if (args.length == 3) c.addAll(completions.rules().signalNames());
+                    else if (args[args.length - 2].equals("--to")) c.addAll(List.of("self", "trackers", "all"));
+                    else {
+                        if (args.length == 4) {
+                            List<String> d = completions.rules().signalData(args[2], ctx());
+                            if (d != null) c.addAll(d);
+                        }
+                        c.add("--to");
                     }
                 }
                 case "preset" -> {
@@ -520,12 +417,8 @@ final class FcCommand implements TabExecutor {
                 case "status" -> {
                     if (args.length == 2) c.addAll(targetHints());
                 }
-                case "import-legacy" -> {
-                    if (args.length == 2) c.add("plugins/CommandHelper/includes/system/player_figura_controller/persistence");
-                    else c.add("--dry-run");
-                }
                 default -> {
-                    // 옛 문법은 안 권한다
+                    // 모르는 하위 명령
                 }
             }
         }
@@ -541,8 +434,10 @@ final class FcCommand implements TabExecutor {
         return c;
     }
 
+    /** 상태 이름 후보 — 전역 · 그 대상이 가진 이름 + 자동완성 규칙에 정확히 적힌 이름(아직 아무도 안 가졌어도) */
     private List<String> nameHints(CommandSender s, String target) {
         Set<String> names = new TreeSet<>(store.global().entries().keySet());
+        names.addAll(completions.rules().stateNames());
         try {
             for (UUID t : targets(s, target)) {
                 if (t == null) continue;
@@ -553,5 +448,29 @@ final class FcCommand implements TabExecutor {
             // 아직 다 안 친 대상
         }
         return new ArrayList<>(names);
+    }
+
+    /** 자동완성 규칙이 부르는 것 — 접속한 이름 · 지금 메모리의 그 상태 값들(전역 → 대상 순) */
+    private CompletionRules.Context ctx() {
+        return new CompletionRules.Context() {
+            @Override
+            public List<String> online() {
+                List<String> out = new ArrayList<>();
+                for (Player p : Bukkit.getOnlinePlayers()) out.add(p.getName());
+                return out;
+            }
+
+            @Override
+            public List<String> used(String stateName) {
+                List<JsonElement> vs = new ArrayList<>();
+                Entry g = store.global().get(stateName);
+                if (g != null) vs.add(g.value);
+                for (SubjectState ss : store.subjects()) {
+                    Entry e = ss.get(stateName);
+                    if (e != null) vs.add(e.value);
+                }
+                return CompletionRules.renderAll(vs);
+            }
+        };
     }
 }
