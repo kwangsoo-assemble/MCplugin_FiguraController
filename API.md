@@ -118,7 +118,7 @@ signals:                                 # 신호 이름 → 데이터 후보 (/
 
 ```xml
 <dependency>  <!-- 이 저장소에서 mvnw install -->
-  <groupId>kr.asmbl</groupId><artifactId>figuracontroller</artifactId><version>0.2.0</version><scope>provided</scope>
+  <groupId>kr.asmbl</groupId><artifactId>figuracontroller</artifactId><version>0.2.1</version><scope>provided</scope>
 </dependency>
 ```
 `plugin.yml` 에 `depend: [FiguraController]`(또는 softdepend 뒤 `isPluginEnabled` 확인).
@@ -220,7 +220,8 @@ plugins/FiguraController/
 ```
 - 형식(셋 다 같다): `{"version": 1, "states": {"skin": {"value": "A"}, "secret": {"value": 1, "private": true}, "buff": {"value": true, "expireIn": 200}}}` — `persist` 인 것만
 - 쓰는 때: 처음 바뀐 뒤 `saveDelayTicks`(100) 지나 한 번 · 나갈 때 · 끌 때 · 비동기(IO 스레드) · 원자적 쓰기
-- 프리셋: `{이름: {value, persist?, private?}}` · `default` = `nickName` · `listName` · `chatName` · `plateName` · `skin` · `isArmWide` = null · `showNametag` = true
+- 프리셋: `{이름: {value, persist?, private?}}` · `default` = `nickName` · `listName` · `chatName` · `plateName` · `skin` · `isArmWide` = null · `showNametag` = true · `nametagShowSpectator` · `nametagShowInvisibility` = false (0.2.1 — 관전 · 투명이면 이름표 숨김 · 아바타 템플릿 `mainFeatures/visibility.lua` 가 읽는다)
+  - ⚠ `default` 프리셋은 **첫 실행에만** 만든다 — 이미 있는 서버에서는 `presets/default.json` 에 손으로 더하거나 `/fc state set global <이름> false`
 - **CH `/rc` 는 상태를 안 건드린다**
 
 ---

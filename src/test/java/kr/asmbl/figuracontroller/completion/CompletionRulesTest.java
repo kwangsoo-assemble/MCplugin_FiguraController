@@ -153,6 +153,7 @@ class CompletionRulesTest {
         assertEquals("라더", nick.get(0));
         assertEquals("null", skin.get(skin.size() - 1));
         assertFalse(r.stateNames().isEmpty());
-        assertTrue(r.stateNames().containsAll(List.of("skin", "nickName", "listName", "chatName", "plateName", "isArmWide", "showNametag")));
+        assertTrue(r.stateNames().containsAll(List.of("skin", "nickName", "listName", "chatName", "plateName", "isArmWide", "showNametag",
+                "nametagShowSpectator", "nametagShowInvisibility")));
     }
 }

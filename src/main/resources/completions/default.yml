@@ -34,7 +34,7 @@ states:
   skin: [$talentAccount, null]
   nickName|listName|chatName|plateName: [$talentKorean, null]
   isArmWide: [true, false, null]
-  showNametag: [true, false]
+  showNametag|nametagShowSpectator|nametagShowInvisibility: [true, false]
 
 # signals:
 #   SCREENSHAKE: ['{"power":1}', '{"power":3}']

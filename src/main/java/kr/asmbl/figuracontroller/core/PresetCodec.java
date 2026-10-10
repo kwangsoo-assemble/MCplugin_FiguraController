@@ -49,7 +49,9 @@ public final class PresetCodec {
         return root;
     }
 
-    /** 첫 프리셋 `default` — 옛 CH 기본 전역(`remains*` 는 뺀다 — 🙋 Q1 · research §6) */
+    /** 첫 프리셋 `default` — 옛 CH 기본 전역(`remains*` 는 뺀다 — 🙋 Q1 · research §6)
+     *  + 이름표 정책 둘 = false(관전 · 투명이면 이름표 숨김 — 0.2.1 · 하네스 template_promotions N1).
+     *  ⚠ 첫 실행에만 쓴다 — 이미 있는 서버의 presets/default.json 은 그대로다(손으로 더한다) */
     public static JsonObject defaults() {
         JsonObject root = new JsonObject();
         for (String n : new String[]{"nickName", "listName", "chatName", "plateName", "skin", "isArmWide"}) {
@@ -60,6 +62,11 @@ public final class PresetCodec {
         JsonObject show = new JsonObject();
         show.add("value", new JsonPrimitive(true));
         root.add("showNametag", show);
+        for (String n : new String[]{"nametagShowSpectator", "nametagShowInvisibility"}) {
+            JsonObject o = new JsonObject();
+            o.add("value", new JsonPrimitive(false));
+            root.add(n, o);
+        }
         return root;
     }
 }

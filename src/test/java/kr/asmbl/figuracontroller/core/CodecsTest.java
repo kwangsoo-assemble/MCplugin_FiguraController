@@ -94,9 +94,12 @@ class CodecsTest {
     void presets() {
         JsonObject def = PresetCodec.defaults();
         Map<String, PresetCodec.Item> items = PresetCodec.read(def);
-        assertEquals(List.of("nickName", "listName", "chatName", "plateName", "skin", "isArmWide", "showNametag"), new ArrayList<>(items.keySet()));
+        assertEquals(List.of("nickName", "listName", "chatName", "plateName", "skin", "isArmWide", "showNametag",
+                "nametagShowSpectator", "nametagShowInvisibility"), new ArrayList<>(items.keySet()));
         assertTrue(items.get("skin").value().isJsonNull());
         assertEquals(new JsonPrimitive(true), items.get("showNametag").value());
+        assertEquals(new JsonPrimitive(false), items.get("nametagShowSpectator").value());
+        assertEquals(new JsonPrimitive(false), items.get("nametagShowInvisibility").value());
         assertTrue(items.get("skin").options().persist());
 
         StateStore s = new StateStore();
