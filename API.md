@@ -37,7 +37,8 @@ CH 「플레이어 피구라 컨트롤러」를 갈음한다 (2026-10-10 배포 
 - JSON 값 그대로 — 불 · 수 · 글 · 배열 · 객체 · **null**. 정수와 실수는 다른 값이다(`1` ≠ `1.0`)
 - **null 은 «지움» 이 아니다** — 값이 null 인 상태가 있는 것이다. 지우는 것은 `unset`
   ⚠ 클라(Lua)에서는 null 값과 «없음» 이 둘 다 `nil` 이라 구분되지 않는다
-- **같은 값으로 다시 쓰면 아무 일도 없다** — 저장 안 함 · 안 보냄 · 이벤트 없음(바이트로 비교)
+- **같은 값 · 같은 공개 범위로 다시 쓰면 보내지 않고 이벤트도 없다**(바이트로 비교 · `set` 은 `false`)
+  ⚠ 단 옵션은 쓸 때마다 새로 붙는다 — 저장 여부 · 만료가 달라졌으면 저장 표시를 하고, 같은 값을 만료 없이 다시 쓰면 걸어 둔 만료가 풀린다(만료를 주면 처음부터 다시 센다)
 - 크기: 패킷 몸 30,000 B 상한(FSB 한도 32,746 B) — 값 · 신호 데이터 하나는 인코딩 29,900 B 까지 · 이름은 UTF-8 256 B 까지. 넘으면 오류
 
 ### 누가 받나 (상태)
@@ -137,14 +138,14 @@ api.global().sendSignal("PING", JsonNull.INSTANCE);               // 전원 · A
 api.isReady(player);                                              // 그 클라가 HELLO 를 보냈나(새 코어)
 api.applyPreset("default", List.of(uuid1, uuid2));  api.presets();
 ```
-- **메인 스레드에서만** — 아니면 `IllegalStateException`
+- **메인 스레드에서 부른다** — 읽기 · 쓰기 · 지우기 · 신호 · `applyPreset` · `clearAll` 은 다른 스레드면 `IllegalStateException`(`isReady` · `presets()` · `global()` 만 검사하지 않는다)
 - `set` 은 즉시 저장소에 반영(같은 틱의 `get` 이 새 값) · 보내기는 **틱 끝에 한 번**(같은 틱에 여러 번 바꾸면 마지막 값)
-- 값은 넣을 때 · 꺼낼 때 사본(밖에서 고쳐도 저장소는 안 바뀐다) · 대상이 `UUID` 인 오버로드도 있다(접속 안 한 플레이어 · 내려간 몹)
+- 값은 넣을 때 · 꺼낼 때 사본(밖에서 고쳐도 저장소는 안 바뀐다) · 대상이 `UUID` 인 오버로드도 있다 — 접속 안 한 플레이어는 저장 파일을 읽어 고친 뒤 다시 저장한다 · ⚠ 청크가 내려간 몹 · 모르는 UUID 는 **메모리에만** 들어가고 저장되지 않는다
 
 **이벤트 (Bukkit)**
 | 이벤트 | 언제 | 내용 |
 |---|---|---|
-| `FiguraStateChangeEvent` | 상태가 **바뀐 뒤**(동기) | `getSubject()`(전역이면 null · `isGlobal()`) · `getName()` · `getOldValue()` · `getNewValue()`(지웠으면 null) · `getCause()` = `API` · `COMMAND` · `PRESET` · `EXPIRE` · `CLEAR` |
+| `FiguraStateChangeEvent` | 상태가 **바뀐 뒤**(동기) | `getSubject()`(전역이면 null · `isGlobal()`) · `getName()` · `getOldValue()` · `getNewValue()`(지웠으면 null) · `getCause()` = `API`(Java API · CH 함수 — `clear(대상)` · `global().clear()` 도) · `COMMAND`(`/fc`) · `PRESET` · `EXPIRE` · `CLEAR`(`/fc state clear` · `clearAll()` 만) |
 | `FiguraSignalReceiveEvent` | 아바타 → 서버 신호 | `getPlayer()` · `getName()` · `getData()` — **그 플레이어의 호스트 아바타가 보낸 것만**(남의 아바타가 보낸 것은 버린다) |
 
 ---

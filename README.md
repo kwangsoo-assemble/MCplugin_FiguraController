@@ -39,6 +39,8 @@
 
 ## Usage (short)
 
+**Command `/fc`**
+
 ```
 /fc state set Steve skin "A"
 /fc state set Steve buff true --transient --expire 200
@@ -47,12 +49,42 @@
 /fc status
 ```
 
-```java
-FiguraControllerAPI api = FiguraController.api();
-api.set(player, "skin", new JsonPrimitive("A"));
-api.sendSignal(player, "SCREENSHAKE", data, Audience.ALL);
-api.global().set("mode", new JsonPrimitive("race"));
+**From another plugin — Java API** (`provided` dependency · there is no remote Maven repository)
+
+```yaml
+# plugin.yml
+depend: [FiguraController]      # if your plugin must run without it, use softdepend and check isPluginEnabled("FiguraController") first
 ```
+
+```bash
+# install the jar from Releases into your local Maven (or ./mvnw install in this repository — FiguraFSB first, see "Building" below)
+mvn install:install-file -Dfile=figuracontroller-0.2.1.jar \
+    -DgroupId=kr.asmbl -DartifactId=figuracontroller -Dversion=0.2.1 -Dpackaging=jar
+```
+
+```xml
+<dependency>
+  <groupId>kr.asmbl</groupId>
+  <artifactId>figuracontroller</artifactId>
+  <version>0.2.1</version>
+  <scope>provided</scope>
+</dependency>
+```
+
+```java
+FiguraControllerAPI api = FiguraController.api();             // main thread only · IllegalStateException if the plugin is disabled
+api.set(player, "skin", new JsonPrimitive("A"));               // true if it changed · sent to clients once at the end of the tick
+api.get(player, "skin");                                       // Optional<JsonElement> — the subject's own value only (a copy)
+api.sendSignal(player, "SCREENSHAKE", data, Audience.ALL);     // default is Audience.TRACKERS (clients tracking the subject + the player)
+api.global().set("mode", new JsonPrimitive("race"));
+
+@EventHandler public void onState(FiguraStateChangeEvent e) { }     // after a state changed (sync) — getSubject · getName · getOldValue · getNewValue · getCause
+@EventHandler public void onSignal(FiguraSignalReceiveEvent e) { }  // signal from the player's own (host) avatar — getPlayer · getName · getData
+```
+
+All of the Java API (options · receivers · events · threading rules) — [`API.md` §3](API.md#3-java-api-팀원-플러그인) (Korean)
+
+**Avatar — Lua**
 
 ```lua
 local skin = server_data:get("skin")               -- own value · falls back to the global value
@@ -138,6 +170,8 @@ the same files — change both together when the protocol changes. Test vectors 
 
 ## 쓰는 법 (짧게)
 
+**명령 `/fc`**
+
 ```
 /fc state set Steve skin "A"
 /fc state set Steve buff true --transient --expire 200
@@ -146,12 +180,42 @@ the same files — change both together when the protocol changes. Test vectors 
 /fc status
 ```
 
-```java
-FiguraControllerAPI api = FiguraController.api();
-api.set(player, "skin", new JsonPrimitive("A"));
-api.sendSignal(player, "SCREENSHAKE", data, Audience.ALL);
-api.global().set("mode", new JsonPrimitive("race"));
+**다른 플러그인에서 — Java API** (`provided` 의존 · 원격 Maven 저장소는 없다)
+
+```yaml
+# plugin.yml
+depend: [FiguraController]      # 없어도 켜져야 하면 softdepend 로 걸고 isPluginEnabled("FiguraController") 를 먼저 본다
 ```
+
+```bash
+# Releases 의 jar 를 로컬 Maven 에 설치 (또는 이 저장소에서 ./mvnw install — FiguraFSB 먼저, 아래 «빌드»)
+mvn install:install-file -Dfile=figuracontroller-0.2.1.jar \
+    -DgroupId=kr.asmbl -DartifactId=figuracontroller -Dversion=0.2.1 -Dpackaging=jar
+```
+
+```xml
+<dependency>
+  <groupId>kr.asmbl</groupId>
+  <artifactId>figuracontroller</artifactId>
+  <version>0.2.1</version>
+  <scope>provided</scope>
+</dependency>
+```
+
+```java
+FiguraControllerAPI api = FiguraController.api();             // 메인 스레드에서만 · 꺼져 있으면 IllegalStateException
+api.set(player, "skin", new JsonPrimitive("A"));               // 바뀌었으면 true · 클라로는 틱 끝에 한 번
+api.get(player, "skin");                                       // Optional<JsonElement> — 그 대상 자기 값만(사본)
+api.sendSignal(player, "SCREENSHAKE", data, Audience.ALL);     // 기본은 Audience.TRACKERS(보는 클라 + 본인)
+api.global().set("mode", new JsonPrimitive("race"));
+
+@EventHandler public void onState(FiguraStateChangeEvent e) { }     // 상태가 바뀐 뒤(동기) — getSubject · getName · getOldValue · getNewValue · getCause
+@EventHandler public void onSignal(FiguraSignalReceiveEvent e) { }  // 호스트 아바타 → 서버 신호 — getPlayer · getName · getData
+```
+
+Java 전부(옵션 · 받는 사람 · 이벤트 · 스레드 규칙) — [`API.md` §3](API.md#3-java-api-팀원-플러그인)
+
+**아바타 — Lua**
 
 ```lua
 local skin = server_data:get("skin")               -- 자기 값 · 없으면 전역 값
